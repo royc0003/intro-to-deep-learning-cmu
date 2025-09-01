@@ -139,7 +139,7 @@ class GELU:
         :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
         :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
         """
-        dAdZ = 0.5 * (1 + self.error_function) + 0.5 * self.Z * (1 / np.sqrt(2*np.pi)) * np.exp(-0.5 * self.Z**2)
+        dAdZ = 0.5 * (1 + self.error_function) + self.Z * (1 / np.sqrt(2*np.pi)) * np.exp(-0.5 * self.Z**2)
         dLdZ = dLdA * dAdZ
         return dLdZ
     
@@ -155,28 +155,40 @@ class Swish:
     Define 'backward' function.
     Read the writeup (Hint: Swish Section) for further details on Swish forward and backward expressions.
     """
+    def __init__(self, beta=1.0):
+        """
+        :param beta: Learnable parameter (beta)
+        """
+        self.beta = beta
+        self.dLdbeta = None  # Initialize gradient w.r.t. beta
 
-    def forward(self, Z, beta):
+    def forward(self, Z):
         """
         :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
         :return: Output returns the computed output A (N samples, C features).
-        Swish forward expression: Swish(Z) = Z * sigmoid(Z)
+        Swish forward expression: Swish(Z, beta) = Z * sigmoid(beta * Z)
         """
-        self.beta = beta
-        sigmoid = Sigmoid()
-        self.A = Z * sigmoid.forward(beta * Z)
+        self.Z = Z
+        # Calculate sigmoid(beta * Z) = 1 / (1 + exp(-beta * Z))
+        self.sigmoid_beta_z = 1 / (1 + np.exp(-self.beta * Z))
+        # A = Z * sigmoid(beta * Z)
+        self.A = Z * self.sigmoid_beta_z
         return self.A
 
-    def backward(self, dLdA, Z, beta):
+    def backward(self, dLdA):
         """
         :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
-        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
-        :param beta: Learnable parameter (beta)
         :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
         """
-        sigmoid = Sigmoid()
-        dAdZ = dLdA * (sigmoid.forward(beta * Z) + Z * beta * sigmoid.forward(beta * Z) * (1 - sigmoid.forward(beta * Z)))
+        # Calculate dA/dZ = sigmoid(beta*Z) + beta*Z*sigmoid(beta*Z)*(1-sigmoid(beta*Z))
+        dAdZ = self.sigmoid_beta_z + self.beta * self.Z * self.sigmoid_beta_z * (1 - self.sigmoid_beta_z)
         dLdZ = dLdA * dAdZ
+        
+        # Calculate dA/dbeta = Z * Z * sigmoid(beta*Z) * (1 - sigmoid(beta*Z))
+        dAdbeta = self.Z * self.Z * self.sigmoid_beta_z * (1 - self.sigmoid_beta_z)
+        # Sum over all elements to get scalar gradient for beta
+        self.dLdbeta = np.sum(dLdA * dAdbeta)
+        
         return dLdZ
 
 class Softmax:
