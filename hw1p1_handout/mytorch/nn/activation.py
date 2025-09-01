@@ -44,6 +44,15 @@ class Sigmoid:
         """
         self.A = 1 / (1 + np.exp(-Z))
         return self.A
+    
+    def backward(self, dLdA):
+        '''
+        :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
+        :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
+        '''
+        dAdZ = self.A * (1 - self.A)
+        dLdZ = dLdA * dAdZ
+        return dLdZ
 
 
 class Tanh:
@@ -57,6 +66,21 @@ class Tanh:
     Read the writeup (Hint: Tanh Section) for further details on Tanh forward and backward expressions.
     """
 
+    def forward(self, Z):
+        """
+        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
+        :return: Output returns the computed output A (N samples, C features).
+        Tanh forward expression: tanh(Z) = (e^Z - e^-Z) / (e^Z + e^-Z)
+        """
+        self.A = (np.exp(Z) - np.exp(-Z)) / (np.exp(Z) + np.exp(-Z))
+        return self.A
+
+    def backward(self, dLdA):
+
+        dAdZ = 1 - self.A**2
+        dLdZ = dLdA * dAdZ
+        return dLdZ
+
 
 class ReLU:
     """
@@ -68,6 +92,23 @@ class ReLU:
     Define 'backward' function.
     Read the writeup (Hint: ReLU Section) for further details on ReLU forward and backward expressions.
     """
+    def forward(self, Z):
+        """
+        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
+        :return: Output returns the computed output A (N samples, C features).
+        ReLU forward expression: ReLU(Z) = max(0, Z)
+        """
+        self.A = np.maximum(0, Z)
+        return self.A
+    
+    def backward(self, dLdA):
+        """
+        :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
+        :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
+        """
+        dAdZ = np.where(self.A > 0, 1, 0)
+        dLdZ = dLdA * dAdZ
+        return dLdZ
 
 
 class GELU:
@@ -81,6 +122,19 @@ class GELU:
     Read the writeup (Hint: GELU Section) for further details on GELU forward and backward expressions.
     Note: Feel free to save any variables from gelu.forward that you might need for gelu.backward.
     """
+
+    def forward(self, Z):
+        """
+        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
+        :return: Output returns the computed output A (N samples, C features).
+        GELU forward expression: GELU(Z) = 0.5 * Z * (1 + er f(Z / sqrt(2)))
+        """
+        self.error_function = scipy.special.erf(Z / np.sqrt(2))
+        self.A = 0.5 * Z * (1 + self.error_function)
+        self.Z = Z
+        return self.A
+    
+
 
 class Swish:
     """
