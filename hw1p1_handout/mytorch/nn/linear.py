@@ -38,11 +38,11 @@ class Linear:
 
         Read the writeup (Hint: Linear Layer Section) for implementation details below variables.
         """
-        dLdA = None  # TODO
-        self.dLdW = None  # TODO
-        self.dLdb = None  # TODO
+        dLdA = dLdZ @ self.W  # TODO
+        self.dLdW = dLdZ.T @ self.A  # TODO
+        self.dLdb = dLdZ.T @ self.ones  # TODO
 
         if self.debug:
             self.dLdA = dLdA
 
-        raise NotImplemented  # TODO - What should be the return value?
+        return dLdA
