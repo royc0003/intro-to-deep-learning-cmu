@@ -156,6 +156,28 @@ class Swish:
     Read the writeup (Hint: Swish Section) for further details on Swish forward and backward expressions.
     """
 
+    def forward(self, Z, beta):
+        """
+        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
+        :return: Output returns the computed output A (N samples, C features).
+        Swish forward expression: Swish(Z) = Z * sigmoid(Z)
+        """
+        self.beta = beta
+        sigmoid = Sigmoid()
+        self.A = Z * sigmoid.forward(beta * Z)
+        return self.A
+
+    def backward(self, dLdA, Z, beta):
+        """
+        :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
+        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
+        :param beta: Learnable parameter (beta)
+        :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
+        """
+        sigmoid = Sigmoid()
+        dAdZ = dLdA * (sigmoid.forward(beta * Z) + Z * beta * sigmoid.forward(beta * Z) * (1 - sigmoid.forward(beta * Z)))
+        dLdZ = dLdA * dAdZ
+        return dLdZ
 
 class Softmax:
     """
