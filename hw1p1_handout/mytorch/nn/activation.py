@@ -205,30 +205,40 @@ class Softmax:
         It will use an entire row of Z to compute an output element.
         Note: How can we handle large overflow values? Hint: Check numerical stability.
         """
-        self.A = None  # TODO
-        raise NotImplementedError  # TODO - What should be the return value?
+        Z_max = np.max(Z, axis=1, keepdims=True)
+        Z = Z - Z_max
+        exp_Z = np.exp(Z)
+        self.A = exp_Z / np.sum(exp_Z, axis=1, keepdims=True) # TODO
+        self.Z = Z
+        print("hello this is the A shape")
+        print(self.A.shape)
+        return self.A
 
     def backward(self, dLdA):
         # Calculate the batch size and number of features
-        N = None  # TODO
-        C = None  # TODO
+        N = self.Z.shape[0]
+        C = self.Z.shape[1]
+        print("hello this is the Z shape")
+        print(self.Z.shape)
+
 
         # Initialize the final output dLdZ with all zeros. Refer to the writeup and think about the shape.
-        dLdZ = None  # TODO
+        dLdZ = np.zeros((N, C))
 
         # Fill dLdZ one data point (row) at a time.
         for i in range(N):
             # Initialize the Jacobian with all zeros.
             # Hint: Jacobian matrix for softmax is a _×_ matrix, but what is _ here?
-            J = None  # TODO
+            J = np.zeros((C, C))
+
 
             # Fill the Jacobian matrix, please read the writeup for the conditions.
             for m in range(C):
                 for n in range(C):
-                    J[m, n] = None  # TODO
+                    J[m, n] = self.A[i,m] * (1 - self.A[i,m]) if m == n else -self.A[i,m] * self.A[i,n]
 
             # Calculate the derivative of the loss with respect to the i-th input, please read the writeup for it.
             # Hint: How can we use (1×C) and (C×C) to get (1×C) and stack up vertically to give (N×C) derivative matrix?
-            dLdZ[i, :] = None  # TODO
+            dLdZ[i, :] = dLdA[i, :] @ J  # TODO
 
-        raise NotImplementedError  # TODO - What should be the return value?
+        return dLdZ
