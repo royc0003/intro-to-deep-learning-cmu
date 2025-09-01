@@ -37,6 +37,14 @@ class Sigmoid:
     Read the writeup (Hint: Sigmoid Section) for further details on Sigmoid forward and backward expressions.
     """
 
+    def forward(self, Z):
+        """
+        :param Z: Batch of data Z (N samples, C features) to apply activation function to input Z.
+        :return: Output returns the computed output A (N samples, C features).
+        """
+        self.A = 1 / (1 + np.exp(-Z))
+        return self.A
+
 
 class Tanh:
     """
