@@ -160,7 +160,7 @@ class Swish:
         :param beta: Learnable parameter (beta)
         """
         self.beta = beta
-        self.dLdbeta = None  # Initialize gradient w.r.t. beta
+        self.dLdbeta = None
 
     def forward(self, Z):
         """
@@ -169,9 +169,7 @@ class Swish:
         Swish forward expression: Swish(Z, beta) = Z * sigmoid(beta * Z)
         """
         self.Z = Z
-        # Calculate sigmoid(beta * Z) = 1 / (1 + exp(-beta * Z))
         self.sigmoid_beta_z = 1 / (1 + np.exp(-self.beta * Z))
-        # A = Z * sigmoid(beta * Z)
         self.A = Z * self.sigmoid_beta_z
         return self.A
 
@@ -180,11 +178,9 @@ class Swish:
         :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
         :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
         """
-        # Calculate dA/dZ = sigmoid(beta*Z) + beta*Z*sigmoid(beta*Z)*(1-sigmoid(beta*Z))
         dAdZ = self.sigmoid_beta_z + self.beta * self.Z * self.sigmoid_beta_z * (1 - self.sigmoid_beta_z)
         dLdZ = dLdA * dAdZ
         
-        # Calculate dA/dbeta = Z * Z * sigmoid(beta*Z) * (1 - sigmoid(beta*Z))
         dAdbeta = self.Z * self.Z * self.sigmoid_beta_z * (1 - self.sigmoid_beta_z)
         # Sum over all elements to get scalar gradient for beta
         self.dLdbeta = np.sum(dLdA * dAdbeta)
