@@ -38,9 +38,9 @@ class Linear:
 
         Read the writeup (Hint: Linear Layer Section) for implementation details below variables.
         """
-        dLdA = dLdZ @ self.W  # TODO
-        self.dLdW = dLdZ.T @ self.A  # TODO
-        self.dLdb = dLdZ.T @ self.ones  # TODO
+        dLdA = dLdZ @ self.W 
+        self.dLdW = dLdZ.T @ self.A  
+        self.dLdb = dLdZ.T @ self.ones  
 
         if self.debug:
             self.dLdA = dLdA
