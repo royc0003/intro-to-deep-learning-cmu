@@ -134,6 +134,15 @@ class GELU:
         self.Z = Z
         return self.A
     
+    def backward(self, dLdA):
+        """
+        :param dLdA: Gradient of loss wrt post-activation output (a measure of how the output A affect the loss L)
+        :return: Gradient of loss with respect to pre-activation input (a measure of how the input Z affect the loss L)
+        """
+        dAdZ = 0.5 * (1 + self.error_function) + 0.5 * self.Z * (1 / np.sqrt(2*np.pi)) * np.exp(-0.5 * self.Z**2)
+        dLdZ = dLdA * dAdZ
+        return dLdZ
+    
 
 
 class Swish:
