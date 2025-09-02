@@ -61,14 +61,13 @@ class BatchNorm1d:
 
         Read the writeup (Hint: Batch Normalization Section) for implementation details for the BatchNorm1d backward.
         """
-        self.dLdBb = None  # TODO: Sum over the batch dimension.
-        self.dLdBW = None  # TODO: Scale gradient of loss wrt BatchNorm transformation by normalized input NZ.
+        self.dLdBb = np.sum(dLdBZ, axis=0) 
+        self.dLdBW = np.sum(dLdBZ * self.NZ, axis=0)  
 
-        dLdNZ = None  # TODO: Scale gradient of loss wrt BatchNorm transformation output by gamma (scaling parameter).
+        dLdNZ = dLdBZ * self.BW 
 
-        dLdV = None  # TODO: Compute gradient of loss backprop through variance calculation.
-        dNZdM = None  # TODO: Compute derivative of normalized input with respect to mean.
-        dLdM = None  # TODO: Compute gradient of loss with respect to mean.
+        dLdV = np.sum(dLdNZ * (self.Z - self.M) * (-0.5) * (self.V + self.eps)**(-1.5), axis=0)
+        dLdM = np.sum(dLdNZ * (-1) * (self.V + self.eps)**(-0.5), axis=0) + dLdV * np.sum(-2 * (self.Z - self.M), axis=0) / self.N
 
-        dLdZ = None  # TODO: Compute gradient of loss with respect to the input.
-        raise NotImplemented  # TODO - What should be the return value?
+        dLdZ = dLdNZ * (self.V + self.eps)**(-0.5) + dLdV * 2 * (self.Z - self.M) / self.N + dLdM / self.N
+        return dLdZ
