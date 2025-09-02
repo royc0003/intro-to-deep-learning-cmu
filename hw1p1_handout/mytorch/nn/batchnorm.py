@@ -33,21 +33,23 @@ class BatchNorm1d:
         Check the values you need to recompute when eval = False.
         """
         self.Z = Z
-        self.N = None  # TODO: Calculate batch size
-        self.M = None  # TODO: Calculate mini-batch mean
-        self.V = None  # TODO: Calculate mini-batch variance
+        self.N = Z.shape[0]
+        self.M = (np.sum(self.Z, axis=0)) / self.N # note axis = 0 refers to column
+        self.V = np.sum((self.Z - self.M)**2, axis=0) / self.N
+        self.ones = np.ones((self.N, 1))
 
         if eval == False:
             # training mode
-            self.NZ = None  # TODO: Calculate the normalized input Ẑ
-            self.BZ = None  # TODO: Calculate the scaled and shifted for the normalized input Ẑ
+            self.NZ = (self.Z - self.M) / np.sqrt(self.V + self.eps)
+            self.BZ = self.BW * self.NZ + self.Bb
 
-            self.running_M = None  # TODO: Calculate running mean
-            self.running_V = None  # TODO: Calculate running variance
+            self.running_M = (self.alpha * self.running_M) + (1 - self.alpha) * self.M
+            self.running_V = (self.alpha * self.running_V) + (1 - self.alpha) * self.V
+
         else:
             # inference mode
-            self.NZ = None  # TODO: Calculate the normalized input Ẑ using the running average for mean and variance
-            self.BZ = None  # TODO: Calculate the scaled and shifted for the normalized input Ẑ
+            self.NZ = (self.Z - self.running_M) / np.sqrt(self.running_V + self.eps)  # Use running averages
+            self.BZ = self.BW * self.NZ + self.Bb  # Scale and shift
 
         return self.BZ
 
