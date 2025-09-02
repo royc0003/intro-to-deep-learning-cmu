@@ -13,12 +13,12 @@ class MSELoss:
         """
         self.A = A
         self.Y = Y
-        self.N = None  # TODO
-        self.C = None  # TODO
-        se = None  # TODO
-        sse = None  # TODO
-        mse = None  # TODO
-        raise NotImplemented  # TODO - What should be the return value?
+        self.N = A.shape[0]
+        self.C = A.shape[1]
+        se = (A - Y) ** 2
+        sse = np.sum(se)
+        mse = sse / (self.N * self.C)
+        return mse
 
     def backward(self):
         """
@@ -27,8 +27,8 @@ class MSELoss:
 
         Read the writeup (Hint: MSE Loss Section) for implementation details for below code snippet.
         """
-        dLdA = None
-        raise NotImplemented  # TODO - What should be the return value?
+        dLdA = 2 * (self.A - self.Y) / (self.N * self.C)
+        return dLdA
 
 
 class CrossEntropyLoss:
@@ -45,8 +45,8 @@ class CrossEntropyLoss:
         """
         self.A = A
         self.Y = Y
-        self.N = None  # TODO
-        self.C = None  # TODO
+        self.N = A.shape[0]
+        self.C = A.shape[1]
 
         Ones_C = None  # TODO
         Ones_N = None  # TODO
