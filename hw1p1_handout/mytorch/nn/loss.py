@@ -1,4 +1,5 @@
 import numpy as np
+from .activation import Softmax
 
 
 class MSELoss:
@@ -48,16 +49,16 @@ class CrossEntropyLoss:
         self.N = A.shape[0]
         self.C = A.shape[1]
 
-        Ones_C = None  # TODO
-        Ones_N = None  # TODO
+        Ones_C = np.ones((self.C, 1))
+        Ones_N = np.ones((self.N, 1))
 
-        self.softmax = None  # TODO - Can you reuse your own softmax here, if not rewrite the softmax forward logic?
+        self.softmax = Softmax().forward(A)
 
-        crossentropy = None  # TODO
-        sum_crossentropy_loss = None  # TODO
+        crossentropy = (-self.Y * np.log(self.softmax)) @ Ones_C
+        sum_crossentropy_loss = Ones_N.T @ crossentropy
         mean_crossentropy_loss = sum_crossentropy_loss / self.N
 
-        raise NotImplemented  # TODO - What should be the return value?
+        return mean_crossentropy_loss
 
     def backward(self):
         """
@@ -66,5 +67,5 @@ class CrossEntropyLoss:
 
         Read the writeup (Hint: Cross-Entropy Loss Section) for implementation details for below code snippet.
         """
-        dLdA = None  # TODO
-        raise NotImplemented  # TODO - What should be the return value?
+        dLdA = (self.softmax - self.Y) / self.N
+        return dLdA
